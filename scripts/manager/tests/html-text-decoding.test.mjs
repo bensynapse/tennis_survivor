@@ -34,7 +34,11 @@ test('cleanText removes script and style blocks whatever the end tag looks like'
   // CodeQL js/bad-tag-filter: `</script >` did not match, so the body stayed in the text.
   assert.equal(cleanText('<script >alert(1)</script >name'), 'name');
   assert.equal(cleanText('<SCRIPT type="text/javascript">x</SCRIPT\n>name'), 'name');
+  assert.equal(cleanText('<script>alert(1)</script\t\n bar>name'), 'name');
+  assert.equal(cleanText('<script>alert(1)</script/>name'), 'name');
+  assert.equal(cleanText('<script>x</scripts>y</script>name'), 'name');
   assert.equal(cleanText('<style>.a{}</style >name'), 'name');
+  assert.equal(cleanText('<style>.a{}</style\tmedia=all>name'), 'name');
   assert.equal(cleanText('<b>Novak</b> <i>Djokovic</i>'), 'Novak Djokovic');
   assert.equal(cleanText('  a  <br/>  b  '), 'a b');
 });

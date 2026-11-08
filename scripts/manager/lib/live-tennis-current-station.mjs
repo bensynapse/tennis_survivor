@@ -24,11 +24,13 @@ export function decodeHtml(value = '') {
 }
 
 export function cleanText(value = '') {
-  // `<\/script\s*>`: an end tag may carry whitespace before `>`, and a filter
-  // that misses it leaves the script body in the text (CodeQL js/bad-tag-filter).
+  // `<\/script\b[^>]*>`: browsers end a script at `</script` followed by any
+  // whitespace, attributes or `/`, such as `</script >` or `</script\t\n bar>`.
+  // A filter that only matches `</script>` leaves the script body in the text
+  // (CodeQL js/bad-tag-filter). `\b` keeps `</scripts>` from ending it.
   return decodeHtml(value)
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, ' ')
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, ' ')
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/gi, ' ')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style\b[^>]*>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
