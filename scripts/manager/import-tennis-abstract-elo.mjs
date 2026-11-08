@@ -1,21 +1,17 @@
 #!/usr/bin/env node
 import { SupabaseRestClient } from './lib/supabase-rest.mjs';
 import { canonicalPlayerKey, normalizeName, parseArgs, writeJson } from './lib/manager-utils.mjs';
+import { cleanText } from './lib/live-tennis-current-station.mjs';
 
 const URLS = {
   ATP: 'https://tennisabstract.com/reports/atp_elo_ratings.html',
   WTA: 'https://tennisabstract.com/reports/wta_elo_ratings.html'
 };
 
-function decodeHtml(value = '') {
-  return String(value)
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&#39;/g, "'")
-    .replace(/&quot;/g, '"')
-    .replace(/<[^>]+>/g, '')
-    .trim();
-}
+// Entity decoding, tag stripping and whitespace collapse live in the shared
+// lib, which decodes in a single pass (CodeQL js/double-escaping). Names go
+// through normalizeName and numbers through Number(), so the collapse is moot.
+const decodeHtml = cleanText;
 
 function toInt(value) {
   const n = Number(String(value || '').replace(/,/g, ''));

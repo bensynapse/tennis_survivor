@@ -11,6 +11,7 @@ import {
   writeJson
 } from './lib/manager-utils.mjs';
 import { loadActiveStation } from './lib/station-payload.mjs';
+import { decodeHtml } from './lib/live-tennis-current-station.mjs';
 
 const args = parseArgs();
 const activeFile = args.active || 'data/manager/active_events.json';
@@ -331,11 +332,4 @@ function extensionFromContentType(contentType) {
   if (contentType.includes('png')) return 'png';
   if (contentType.includes('webp')) return 'webp';
   return 'jpg';
-}
-
-function decodeHtml(value) {
-  return String(value)
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
 }

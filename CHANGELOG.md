@@ -15,12 +15,18 @@ Versioning guideline:
 - Added a server-side API Tennis proxy with shared JSON cache, SSE fan-out, ETags, CORS allow-listing, request throttling, and persisted daily request accounting.
 - Added production systemd and Nginx templates. The API key is read only from a protected server environment file and is never exposed to the static site.
 
+### Fixed
+- The manager preview view names from `?manager-view=` and `?manager-my-view=` are now taken from the allow-list itself and escaped in the rendered class, so a URL value can never reach `innerHTML` (CodeQL js/xss).
+- HTML entities in scraped text are decoded in one pass in the shared lib, so `&amp;quot;` no longer decodes twice, and the four manager scripts use that decoder instead of their own copies (CodeQL js/double-escaping, js/incomplete-multi-character-sanitization).
+- `cleanText` now removes `<script>` and `<style>` blocks whose end tag carries whitespace, such as `</script >` (CodeQL js/bad-tag-filter).
+
 ### Changed
 - Live-score polling now runs only around scheduled match windows: 60-second observation probes and fixed 8-second refreshes after a live match is detected. Local request-count throttling at 6500, 7300, and 7800 has been removed.
 - Match cards now use explicit Chinese status pills, neutral white player rows, live-only current-point highlighting, and a winner stamp on completed matches.
 - Missing court and surface metadata are displayed as `未标注` instead of being hardcoded.
 
 ### Validation
+- Added Node.js tests for single-pass entity decoding, script end-tag filtering, and allow-listed preview view names, and ran the complete manager test suite and Python scoring tests.
 - Added Node.js tests for field normalization, tournament/court grouping, observation windows, no polling outside match windows, and adaptive request intervals.
 - Verified the service health and cached response endpoints, parsed all new JavaScript, and ran `git diff --check`.
 - Verified desktop browser navigation, zero horizontal overflow, and the independent H2H form without using simulated score data.

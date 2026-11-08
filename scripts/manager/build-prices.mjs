@@ -13,6 +13,7 @@ import {
   slugify,
   writeJson
 } from './lib/manager-utils.mjs';
+import { cleanText } from './lib/live-tennis-current-station.mjs';
 
 const RANKING_URLS = {
   ATP: 'https://www.live-tennis.cn/zh/rank/atp/s/year',
@@ -124,18 +125,9 @@ const ROUND_LABELS_BY_BRACKET = {
   128: ['R128', 'R64', 'R32', 'R16', 'QF', 'SF', 'F', 'W']
 };
 
-function decodeHtml(value = '') {
-  return String(value)
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&#39;/g, "'")
-    .replace(/&apos;/g, "'")
-    .replace(/&quot;/g, '"')
-    .replace(/&#x27;/g, "'")
-    .replace(/<[^>]+>/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+// Entity decoding, tag stripping and whitespace collapse live in the shared
+// lib, which decodes in a single pass (CodeQL js/double-escaping).
+const decodeHtml = cleanText;
 
 function attr(html = '', name) {
   const m = html.match(new RegExp(`${name}=["']([^"']*)["']`, 'i'));
