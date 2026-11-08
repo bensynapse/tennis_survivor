@@ -2,22 +2,33 @@ import { canonicalPlayerKey, normalizeName, slugify } from './manager-utils.mjs'
 
 export const LIVE_TENNIS_BASE_URL = 'https://www.live-tennis.cn';
 
+const NAMED_ENTITIES = { nbsp: ' ', amp: '&', apos: "'", quot: '"' };
+
+/**
+ * Decode the HTML entities the scraped pages use, in one pass.
+ *
+ * One pass matters: chained replaces decoded `&amp;` first, so `&amp;quot;`
+ * became `&quot;` and then `"`, one decode too many (CodeQL js/double-escaping).
+ * Here the output of one entity is never fed to the next. Entities that are
+ * not known, and code points that are not valid, are left as they were.
+ */
 export function decodeHtml(value = '') {
-  return String(value)
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&#39;/g, "'")
-    .replace(/&apos;/g, "'")
-    .replace(/&quot;/g, '"')
-    .replace(/&#x27;/g, "'")
-    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
-    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)));
+  return String(value).replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (entity, body) => {
+    const key = body.toLowerCase();
+    if (key.startsWith('#')) {
+      const codePoint = key.startsWith('#x') ? parseInt(key.slice(2), 16) : parseInt(key.slice(1), 10);
+      return codePoint <= 0x10ffff ? String.fromCodePoint(codePoint) : entity;
+    }
+    return Object.prototype.hasOwnProperty.call(NAMED_ENTITIES, key) ? NAMED_ENTITIES[key] : entity;
+  });
 }
 
 export function cleanText(value = '') {
+  // `<\/script\s*>`: an end tag may carry whitespace before `>`, and a filter
+  // that misses it leaves the script body in the text (CodeQL js/bad-tag-filter).
   return decodeHtml(value)
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, ' ')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();

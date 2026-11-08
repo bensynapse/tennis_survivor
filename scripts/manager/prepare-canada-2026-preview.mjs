@@ -9,6 +9,7 @@ import {
   readJson,
   writeJson
 } from './lib/manager-utils.mjs';
+import { cleanText } from './lib/live-tennis-current-station.mjs';
 
 const ATP_EVENT_KEY = 'atp-2026-w32-montreal-national-bank-open';
 const WTA_EVENT_KEY = 'wta-2026-w32-toronto-national-bank-open';
@@ -215,16 +216,9 @@ const WTA_SLOTS = [
   [128, 'Elena RYBAKINA', 'KAZ', 2]
 ];
 
-function decodeHtml(value = '') {
-  return String(value)
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&#39;|&apos;|&#x27;/g, "'")
-    .replace(/&quot;/g, '"')
-    .replace(/<[^>]+>/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+// Entity decoding, tag stripping and whitespace collapse live in the shared
+// lib, which decodes in a single pass (CodeQL js/double-escaping).
+const decodeHtml = cleanText;
 
 function personKey(value = '') {
   return normalizeName(value)
