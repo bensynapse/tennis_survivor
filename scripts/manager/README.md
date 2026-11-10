@@ -54,7 +54,7 @@ Current station selection is still manual: edit `data/manager/active_events.json
    - WTA defaults to the official `wtafiles.blob.core.windows.net/images/headshots/{profile_id}.jpg` headshot and can download it into `assets/manager/players/wta/`.
    - ATP official media aliases are Cloudflare-protected from direct scripts, so ATP rows stay pending unless already manually cached.
 
-`.github/workflows/update_manager.yml` runs the manager refresh at 06:00 Asia/Shanghai each day:
+The manager refresh has no workflow. The `update_manager.yml` workflow was removed because the repo has no Supabase secrets. Run the steps by hand in this order:
 `refresh-current-station-data.mjs --write --sync`, then `maybe-build-prices.mjs`, then the current-station publisher, then `apply-qualifier-placements.mjs`, then `apply-pre-r1-substitutions.mjs`, then `settle-current-or-previous-station.mjs`, then `validate-station.mjs`.
 
 `settle-current-or-previous-station.mjs` keeps settlement on `previous_station` while its finals are incomplete. It syncs and settles the previous station first; only after all previous-station finals are completed does it continue to the current active station. This preserves delayed finals and combo settlement during week-to-week station transitions.

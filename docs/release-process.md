@@ -42,11 +42,6 @@ python3 -m http.server 4173
   - 频率：每天 `03:11` UTC
   - 作用：更新 `data/current.json` 和 `data/breakdown.json`
 
-- `Update Daily Data`
-  - 文件：`.github/workflows/update_preference.yml`
-  - 频率：每天 `03:19` UTC
-  - 作用：更新 `data/history.json`
-
 ## 发布注意事项
 
 - 如果修改了 `.github/workflows/*.yml`，GitHub token 需要 `workflow` 权限。
